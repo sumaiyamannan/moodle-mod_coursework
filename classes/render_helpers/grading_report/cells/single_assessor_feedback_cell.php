@@ -218,7 +218,7 @@ class single_assessor_feedback_cell extends cell_base {
             'assessor' => $assessor,
             'stage' => $this->stage,
         ];
-        $link = $this->get_router()->get_path('ajax new final feedback', $feedbackparams);
+        $link = $this->get_router()->get_path('new final feedback', $feedbackparams);
 
         $linkid = 'new_final_feedback_' . $rowobject->get_coursework()
             ->get_allocatable_identifier_hash($rowobject->get_allocatable());
@@ -228,7 +228,7 @@ class single_assessor_feedback_cell extends cell_base {
         return  $OUTPUT->action_link($link,
                                      $title,
                                      null,
-                                     ['class' => 'new_final_feedback', 'id' => $linkid]);
+                                     ['target' => '_blank', 'class' => 'new_final_feedback', 'id' => $linkid]);
     }
 
 }

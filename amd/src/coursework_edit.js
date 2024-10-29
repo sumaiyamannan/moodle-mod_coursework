@@ -733,8 +733,7 @@ define('mod_coursework/coursework_edit',
                 /**
                  * Feedback
                  */
-                $('.datatabletest').on('click', '.new_final_feedback, .new_feedback,' +
-                    ' .edit_final_feedback, .edit_feedback, .show_feedback', function(e) {
+                $('.datatabletest').on('click', '.show_feedback', function(e) {
                     e.preventDefault();
                     var url = $(this).attr('href');
                     $.ajax({
@@ -763,19 +762,6 @@ define('mod_coursework/coursework_edit',
                                         elementId: 'id_feedbackcomment',
                                         options: JSON.parse(response.editoroptions),
                                     });
-                                });
-                            }
-                            if (response.gdata) {
-                                const gdata = response.gdata;
-                                const rows = Object.values(gdata);
-                                rows.forEach(function(row) {
-                                    const elementName = "advancedgrading-criteria-" + row.criterionid ;
-                                    const elementLevel = document.getElementById(elementName + "-levels-" + row.avglevel).classList;
-                                    if (elementLevel) {
-                                        elementLevel.add('currentchecked');
-                                    }
-                                    document.getElementById(elementName + "-levels-" + row.avglevel + "-definition").checked = true;
-                                    document.getElementById(elementName + "-grade").value = row.avggrade;
                                 });
                             }
                             if (response.commentoptions) {

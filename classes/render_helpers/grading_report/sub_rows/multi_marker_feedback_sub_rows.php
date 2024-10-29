@@ -222,7 +222,7 @@ class multi_marker_feedback_sub_rows implements sub_rows_interface {
         $icon = new pix_icon('edit', $linktitle, 'coursework');
         $linkid = "edit_feedback_" . $feedbackrow->get_feedback()->id;
         $link = $this->get_router()
-            ->get_path('ajax edit feedback', ['feedback' => $feedbackrow->get_feedback()]);
+            ->get_path('edit feedback', ['feedback' => $feedbackrow->get_feedback()]);
         $iconlink = $OUTPUT->action_icon($link, $icon, null, ['id' => $linkid, 'class' => 'edit_feedback']);
         return $iconlink;
     }
@@ -261,7 +261,7 @@ class multi_marker_feedback_sub_rows implements sub_rows_interface {
         $iconlink = $OUTPUT->action_link($link,
                                          $linktitle,
                                          null,
-                                         ['class' => 'show_feedback', 'id' => $linkid]);
+                                         ['target' => '_blank', 'class' => 'show_feedback', 'id' => $linkid]);
         return $iconlink;
     }
 
@@ -284,11 +284,11 @@ class multi_marker_feedback_sub_rows implements sub_rows_interface {
             'assessor' => user::find($USER, false),
             'stage' => $feedbackrow->get_stage(),
         ];
-        $link = $this->get_router()->get_path('ajax new feedback', $newfeedbackparams);
+        $link = $this->get_router()->get_path('new feedback', $newfeedbackparams);
         $iconlink = $OUTPUT->action_link($link,
                                          $linktitle,
                                          null,
-                                         ['class' => 'new_feedback']);
+                                         ['target'=>'_blank', 'class' => 'new_feedback']);
         return $iconlink;
     }
 

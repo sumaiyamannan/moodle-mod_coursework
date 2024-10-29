@@ -94,14 +94,14 @@ class multiple_agreed_grade_cell extends cell_base {
             $feedbackrouteparams = [
                 'feedback' => $finalfeedback,
             ];
-            $link = $this->get_router()->get_path('ajax edit feedback', $feedbackrouteparams);
+            $link = $this->get_router()->get_path('edit feedback', $feedbackrouteparams);
 
             $iconlink = $OUTPUT->action_icon($link,
                                              $icon,
                                              null,
-                                             [
-                                                 'class' => 'edit_final_feedback',
-                                                 'id' => 'edit_final_feedback_' . $rowobject->get_coursework()
+                                             ['target' => '_blank',
+                                                'class' => 'edit_final_feedback',
+                                                'id' => 'edit_final_feedback_' . $rowobject->get_coursework()
                                                      ->get_allocatable_identifier_hash($rowobject->get_allocatable())]);
 
         } else if ($rowobject->has_submission()) { // New
@@ -121,14 +121,15 @@ class multiple_agreed_grade_cell extends cell_base {
                     'assessor' => $USER,
                     'stage' => $this->stage,
                 ];
-                $link = $this->get_router()->get_path('ajax new final feedback', $feedbackrouteparams);
+                $link = $this->get_router()->get_path('new final feedback', $feedbackrouteparams);
 
                 $iconlink = $OUTPUT->action_link($link,
                                                  $title,
                                                  null,
-                                                 ['class' => 'new_final_feedback',
-                                                       'id' => 'new_final_feedback_' . $rowobject->get_coursework()
-                                                           ->get_allocatable_identifier_hash($rowobject->get_allocatable())]);
+                                                 ['target' => '_blank',
+                                                'class' => 'new_final_feedback',
+                                                'id' => 'new_final_feedback_' . $rowobject->get_coursework()
+                                                ->get_allocatable_identifier_hash($rowobject->get_allocatable())]);
 
             } else if ($existingfeedback && $ability->can('show', $existingfeedback)) {
 
