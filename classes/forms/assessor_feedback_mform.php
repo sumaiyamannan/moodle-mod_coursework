@@ -94,6 +94,9 @@ class assessor_feedback_mform extends moodleform {
             $this->_grading_instance = $this->_grading_controller->get_or_create_instance(0, $feedback->assessorid, $feedback->id);
 
             $mform->addElement('grading', 'advancedgrading', get_string('grade', 'mod_coursework'), array('gradinginstance' => $this->_grading_instance));
+        } else if ($feedback->stage_identifier == 'final_agreed_1') {
+            $mform->addElement('text', 'grade', get_string('grade', 'mod_coursework'));
+            $mform->setType('grade', PARAM_RAW);
         } else {
             $mform->addElement('select',
                                'grade',
@@ -167,6 +170,11 @@ class assessor_feedback_mform extends moodleform {
      */
     public function validate_grade($data) {
         $result = true;
+        if (!empty($data->feedbackcomment['text'])) {
+            if (isset($data->submitfeedbackbutton) && $data->submitfeedbackbutton == 1) {
+                return $result;
+            }
+        }
         if (!empty($this->_grading_instance) && property_exists($data, 'advancedgrading')) {
             $result = $this->_grading_instance->validate_grading_element($data->advancedgrading);
         }
@@ -183,8 +191,14 @@ class assessor_feedback_mform extends moodleform {
 
         $formdata = $this->get_data();
         $coursework = $feedback->get_coursework();
-
-        if (($coursework->is_using_advanced_grading() && $coursework->finalstagegrading == 0 ) || ($coursework->is_using_advanced_grading() && $coursework->finalstagegrading == 1 &&  $feedback->stage_identifier != 'final_agreed_1')) {
+        if ((isset($formdata->submitfeedbackbutton) || $formdata->submitfeedbackbutton == 1)) {
+            $submitfeedback = 1;
+        }
+        if (($coursework->is_using_advanced_grading() && $coursework->finalstagegrading == 0 )
+            || ($coursework->is_using_advanced_grading() && $coursework->finalstagegrading == 1
+            &&  $feedback->stage_identifier != 'final_agreed_1')
+            && !($submitfeedback)
+            ) {
             $controller = $coursework->get_advanced_grading_active_controller();
             $gradinginstance = $controller->get_or_create_instance(0, $feedback->assessorid, $feedback->id);
             /**

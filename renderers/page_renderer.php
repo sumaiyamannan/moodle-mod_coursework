@@ -345,7 +345,6 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
         $gdata = [];
         $submission = $newfeedback->get_submission();
         $gradingtitle = get_string('gradingfor', 'coursework', $submission->get_allocatable_name());
-
         $this->page->set_pagelayout('standard');
         $this->page->navbar->add($gradingtitle);
         $this->page->set_title($SITE->fullname);
@@ -398,10 +397,14 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
             // popululate the form with initial feedbacks
             $simpleform->set_data($teacherfeedback);
         }
+
         // Autopopulate average grade from initial assessors.
         if ($newfeedback->stage_identifier == 'final_agreed_1' && $newfeedback->id == 0) {
-            $gdata = $coursework->get_advanced_grading_average_grade_range_rubric($newfeedback->submissionid);
+            if (str_contains($coursework->automaticagreementstrategy, 'none')) {
+                $gdata = $coursework->get_advanced_grading_average_grade_range_rubric($newfeedback->submissionid);
+            }
         }
+
         if ($ajax) {
             $formhtml = $simpleform->render();
             $filemanageroptions = $simpleform->get_file_options();
