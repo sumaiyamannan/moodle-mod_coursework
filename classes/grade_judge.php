@@ -73,7 +73,7 @@ class grade_judge {
             // Avoid PHPUnit exception passing null or empty string to round().
             return null;
         }
-        return round($grade, 2);
+        return number_format($grade, 2);
     }
 
     /**
@@ -94,6 +94,7 @@ class grade_judge {
             $scale = \grade_scale::fetch(['id' => abs($this->coursework->grade)]);
             return $scale->get_nearest_item($grade);
         }
+
     }
 
     /**
