@@ -170,13 +170,15 @@ class assessor_feedback_mform extends moodleform {
      */
     public function validate_grade($data) {
         $result = true;
-        if (!empty($data->feedbackcomment['text'])) {
-            if (isset($data->submitfeedbackbutton) && $data->submitfeedbackbutton == 1) {
-                return $result;
-            }
-        }
         if (!empty($this->_grading_instance) && property_exists($data, 'advancedgrading')) {
             $result = $this->_grading_instance->validate_grading_element($data->advancedgrading);
+        }
+        if (!$result) {
+            if (!empty($data->feedbackcomment['text'])) {
+                if (isset($data->submitfeedbackbutton) && $data->submitfeedbackbutton == 1) {
+                    $result = true;
+                }
+            }
         }
         return $result;
     }
