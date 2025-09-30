@@ -173,9 +173,9 @@ class assessor_feedback_mform extends moodleform {
         if (!empty($this->_grading_instance) && property_exists($data, 'advancedgrading')) {
             $result = $this->_grading_instance->validate_grading_element($data->advancedgrading);
         }
-        if (!$result) {
+        if (!isset($result) || !$result) {
             if (!empty($data->feedbackcomment['text'])) {
-                if (isset($data->submitfeedbackbutton) && $data->submitfeedbackbutton == 1) {
+                if (isset($data->submitfeedbackbutton)) {
                     $result = true;
                 }
             }

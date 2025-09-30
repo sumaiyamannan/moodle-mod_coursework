@@ -84,8 +84,8 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
      */
     public function edit_feedback_page(feedback $teacherfeedback, $assessor, $editor, $ajax = false) {
 
-        global $SITE;
-
+        global $SITE, $PAGE;
+        $gdata = [];
         $gradingtitle =
             get_string('gradingfor', 'coursework', $teacherfeedback->get_submission()->get_allocatable_name());
 
@@ -132,6 +132,14 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
 
         $simpleform->set_data($teacherfeedback);
 
+        // Autopopulate average grade from initial assessors.
+        $courseworkid = $teacherfeedback->get_submission()->courseworkid;
+        $coursework = coursework::find($courseworkid);
+        if ($teacherfeedback->stage_identifier == 'final_agreed_1') {
+            if (str_contains($coursework->automaticagreementstrategy, 'none')) {
+                $gdata = $coursework->get_advanced_grading_average_grade_range_rubric($teacherfeedback->get_submission()->id);
+            }
+        }
         if ($ajax) {
             $formhtml = $simpleform->render();
             $filemanageroptions = $simpleform->get_file_options();
@@ -141,6 +149,7 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
             echo json_encode(['formhtml' => $html . $formhtml, 'filemanageroptions' => $filemanageroptions, 'editoroptions' => $editoroptions, 'commentoptions' => $commentoptions]);
 
         } else {
+            $PAGE->requires->js_call_amd('mod_coursework/rubric_ranges', 'init', [$gdata]);
             $this->page->set_pagelayout('standard');
             $this->page->navbar->add($gradingtitle);
             $this->page->set_title($SITE->fullname);
@@ -386,6 +395,9 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
             $feedbackcomment = '';
             $count = 1;
             foreach ($initialfeedbacks as $initialfeedback) {
+                if (empty($initialfeedback->feedbackcomment)) {
+                    continue;
+                }
                 // put all initial feedbacks together for the comment field
                 $feedbackcomment .= get_string('assessorcomments', 'mod_coursework', $count);
                 $feedbackcomment .= $initialfeedback->feedbackcomment;
@@ -411,7 +423,7 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
             $editoroptions = $simpleform->get_editor_options();
 
             $commentoptions = $this->get_comment_options($simpleform);
-            echo json_encode(['formhtml' => $html . $formhtml, 'filemanageroptions' => $filemanageroptions, 'editoroptions' => $editoroptions, 'commentoptions' => $commentoptions, 'gdata' => $gdata]);
+            echo json_encode(['formhtml' => $html . $formhtml, 'filemanageroptions' => $filemanageroptions, 'editoroptions' => $editoroptions, 'commentoptions' => $commentoptions]);
 
         } else {
             $PAGE->requires->js_call_amd('mod_coursework/rubric_ranges', 'init', [$gdata]);
@@ -421,6 +433,9 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
             $PAGE->set_heading($SITE->fullname);
             echo $OUTPUT->header();
             echo $html;
+            if (isset($newfeedback->error)) {
+                echo html_writer::tag('div', $newfeedback->error, ['class' => 'alert alert-danger']);
+            }
             $simpleform->display();
             echo $this->output->footer();
         }

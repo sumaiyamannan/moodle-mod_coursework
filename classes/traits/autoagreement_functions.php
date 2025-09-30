@@ -46,6 +46,9 @@ trait autoagreement_functions {
         $count = 1;
 
         foreach ($feedbacks as $feedback) {
+            if (empty($feedback->feedbackcomment)) {
+                continue;
+            }
             // Put all initial feedbacks together for the comment field.
             $feedbackcomment .= get_string('assessorcomments', 'mod_coursework', $count);
             $feedbackcomment .= $feedback->feedbackcomment;

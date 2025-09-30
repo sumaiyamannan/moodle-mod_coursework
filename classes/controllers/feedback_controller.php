@@ -316,8 +316,9 @@ class feedback_controller extends controller_base {
                 redirect($courseworkpageurl);
             }
         } else {
+            $teacherfeedback->error = get_string('gradeorfeedback', 'mod_coursework');
             if ($ajax) {
-                echo json_encode(['success' => false, 'message' => get_string('gradeorfeedback', 'mod_coursework')]);
+                echo json_encode(['success' => false, 'message' => $teacherfeedback->error]);
             } else {
                 $renderer = $this->get_page_renderer();
                 $renderer->new_feedback_page($teacherfeedback);
@@ -423,10 +424,12 @@ class feedback_controller extends controller_base {
         $ajax = !empty($this->params['ajax']);
         $data = $form->get_data();
         if (!($data && $form->validate_grade($data))) {
+            $teacherfeedback->error = get_string('gradeorfeedback', 'mod_coursework');
             if ($ajax) {
-                echo json_encode(['success' => false, 'message' => get_string('gradeorfeedback', 'mod_coursework')]);
+                echo json_encode(['success' => false, 'message' => $teacherfeedback->error]);
                 exit;
             } else {
+                echo $teacherfeedback->error;
                 redirect($courseworkpageurl);
             }
         }
