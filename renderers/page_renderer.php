@@ -85,7 +85,6 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
     public function edit_feedback_page(feedback $teacherfeedback, $assessor, $editor, $ajax = false) {
 
         global $SITE, $PAGE;
-        $gdata = [];
         $gradingtitle =
             get_string('gradingfor', 'coursework', $teacherfeedback->get_submission()->get_allocatable_name());
 
@@ -135,21 +134,13 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
         // Autopopulate average grade from initial assessors.
         $courseworkid = $teacherfeedback->get_submission()->courseworkid;
         $coursework = coursework::find($courseworkid);
-        if ($teacherfeedback->stage_identifier == 'final_agreed_1') {
-            if (str_contains($coursework->automaticagreementstrategy, 'none')) {
-                $gdata = $coursework->get_advanced_grading_average_grade_range_rubric($teacherfeedback->get_submission()->id);
-            }
-        }
         if ($ajax) {
             $formhtml = $simpleform->render();
             $filemanageroptions = $simpleform->get_file_options();
             $editoroptions = $simpleform->get_editor_options();
 
             $commentoptions = $this->get_comment_options($simpleform);
-            echo json_encode(['formhtml' => $html . $formhtml, 'filemanageroptions' => $filemanageroptions, 'editoroptions' => $editoroptions, 'commentoptions' => $commentoptions]);
-
         } else {
-            $PAGE->requires->js_call_amd('mod_coursework/rubric_ranges', 'init', [$gdata]);
             $this->page->set_pagelayout('standard');
             $this->page->navbar->add($gradingtitle);
             $this->page->set_title($SITE->fullname);

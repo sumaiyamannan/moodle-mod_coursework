@@ -27,12 +27,19 @@ define([], function() {
             if (gdata) {
                 const rows = Object.values(gdata);
                 rows.forEach(function(row) {
-                    const elementName = "advancedgrading-criteria-" + row.criterionid;
-                    const elementLevel = document.getElementById(elementName + "-levels-" + row.avglevel).classList;
+                    let elementName = "advancedgrading-criteria-" + row.criterionid;
+                    let selectlevel = row.avglevel;
+                    let elementLevel = document.getElementById(elementName + "-levels-" + selectlevel).classList;
+                    let scorevalue = document.getElementById(elementName + "-levels-" + selectlevel + "-score").textContent;
+                    let scorevaluerange = scorevalue.split(" to ");
+                    if (!(row.avggrade >= Number(scorevaluerange[0]) && row.avggrade <= Number(scorevaluerange[1]))) {
+                        selectlevel = selectlevel - 1;
+                        elementLevel = document.getElementById(elementName + "-levels-" + selectlevel).classList;
+                    }
                     if (elementLevel) {
                         elementLevel.add('currentchecked');
                     }
-                    document.getElementById(elementName + "-levels-" + row.avglevel + "-definition").checked = true;
+                    document.getElementById(elementName + "-levels-" + selectlevel + "-definition").checked = true;
                     document.getElementById(elementName + "-grade").value = row.avggrade;
                 });
             }
