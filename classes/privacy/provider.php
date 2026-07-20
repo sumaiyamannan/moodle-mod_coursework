@@ -98,6 +98,8 @@ class provider implements
         $collection->add_database_table('coursework_person_deadlines', $persondeadlines, 'privacy:metadata:persondeadlines');
         $collection->add_database_table('coursework_mod_agreements', $modagreements, 'privacy:metadata:modagreements');
         $collection->add_database_table('coursework_plagiarism_flags', $plagiarismflags, 'privacy:metadata:plagiarismflags');
+        $collection->add_database_table('coursework_reminder', $plagiarismflags, 'privacy:metadata:reminder');
+        $collection->add_database_table('coursework_allocation_config', $plagiarismflags, 'privacy:metadata:allocation_config');
         return $collection;
     }
     /**
@@ -173,6 +175,24 @@ class provider implements
                     JOIN {coursework_plagiarism_flags} cwpf ON cws.id = cwpf.submissionid
                 WHERE ctx.id = :contextid AND ctx.contextlevel = :contextlevel";
         $userlist->add_from_sql('createdby', $sql, $params);
+
+        $sql = "SELECT cr.userid
+                    FROM {context} ctx
+                    JOIN {course_modules} cm ON cm.id = ctx.instanceid
+                    JOIN {modules} m ON m.id = cm.module AND m.name = :modulename
+                    JOIN {coursework} cw ON cw.id = cm.instance
+                    JOIN {coursework_reminder} cr ON cw.id = cr.coursework_id
+                WHERE ctx.id = :contextid AND ctx.contextlevel = :contextlevel";
+        $userlist->add_from_sql('userid', $sql, $params);
+
+        $sql = "SELECT cr.assessorid
+                    FROM {context} ctx
+                    JOIN {course_modules} cm ON cm.id = ctx.instanceid
+                    JOIN {modules} m ON m.id = cm.module AND m.name = :modulename
+                    JOIN {coursework} cw ON cw.id = cm.instance
+                    JOIN {coursework_allocation_config} ac ON cw.id = ac.courseworkid
+                WHERE ctx.id = :contextid AND ctx.contextlevel = :contextlevel";
+        $userlist->add_from_sql('userid', $sql, $params);
 
     }
     /**
@@ -265,6 +285,8 @@ class provider implements
             static::export_coursework_extension($coursework->id, $user->id, $context, []);
             static::export_person_deadlines($coursework->id, $user->id, $context, []);
             static::export_plagiarism_flags($coursework->id, $context, []);
+            static::export_reminder($coursework->id, $context, []);
+            static::export_allocation_config($coursework->id, $context, []);
         }
     }
     public static function delete_data_for_all_users_in_context(\context $context) {
@@ -558,6 +580,41 @@ class provider implements
         }
     }
 
+    protected static function export_reminder($courseworkid, $context, $path) {
+        $reminder = self::get_reminder($courseworkid);
+        if ($reminder) {
+            self::export_reminder_data($reminder, $context, $path);
+        }
+    }
+
+    protected static function export_allocation_config($courseworkid, $context, $path) {
+        $allocation = self::get_allocation_config($courseworkid);
+        if ($allocation) {
+            self::export_allocation_config_data($allocation, $context, $path);
+        }
+    }
+
+
+    protected static function get_reminder($courseworkid) {
+        global $DB;
+
+        $param = ['coursework_id' => $courseworkid];
+
+        $plagiarism = $DB->get_record('coursework_reminder', $param);
+
+        return $plagiarism;
+    }
+
+    protected static function get_allocation_config($courseworkid) {
+        global $DB;
+
+        $param = ['courseworkid' => $courseworkid];
+
+        $allocation = $DB->get_record('coursework_allocation_config', $param);
+
+        return $allocation;
+    }
+
     protected static function get_plagiarism_flags($courseworkid) {
         global $DB;
 
@@ -566,6 +623,29 @@ class provider implements
         $plagiarism = $DB->get_record('coursework_plagiarism_flags', $param);
 
         return $plagiarism;
+    }
+
+    protected static function export_reminder_data($reminder, $context, $path) {
+            $reminderdata = [
+            'extension' => $reminder->extension,
+            'remindernumber' => $reminder->remindernumber,
+            'userid' => $reminder->userid,
+        ];
+
+        writer::with_context($context)
+                ->export_data(array_merge($path, [get_string('privacy:reminder', 'mod_coursework')]), (object) $reminderdata);
+    }
+
+    protected static function export_allocation_config_data($allocation, $context, $path) {
+            $allocationdata = [
+            'extension' => $allocation->allocationstrategy,
+            'assessorid' => $allocation->assessorid,
+            'remindernumber' => $allocation->value,
+            'userid' => $allocation->purpose,
+        ];
+
+        writer::with_context($context)
+                ->export_data(array_merge($path, [get_string('privacy:allocation_config', 'mod_coursework')]), (object) $allocationdata);
     }
 
     protected static function export_plagiarism_flags_data($plagiarism, $context, $path) {
