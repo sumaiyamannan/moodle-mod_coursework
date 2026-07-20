@@ -81,7 +81,7 @@ class grade_judge {
      * @return null
      */
     public function grade_to_display($grade) {
-        if (is_null($grade)) {
+        if (is_null($grade) || $grade == -1) {
             return '';
         } else if ($this->coursework->grade >= 1) {
             // Numeric grade
