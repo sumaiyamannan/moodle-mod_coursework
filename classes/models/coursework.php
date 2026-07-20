@@ -940,7 +940,7 @@ class coursework extends table_base {
      * @return bool | string path of temp file - note this returned file does not have a .zip
      * extension - it is a temp file.
      */
-    public function pack_files() {
+    public function pack_files($convert = 0) {
 
         global $CFG, $DB, $USER;
 
@@ -952,6 +952,7 @@ class coursework extends table_base {
         if (!$submissions) {
             return false;
         }
+
         $filesforzipping = [];
         $fs = get_file_storage();
 
@@ -960,12 +961,25 @@ class coursework extends table_base {
         $submissions = $gradingsheet->get_submissions();
 
         foreach ($submissions as $submission) {
+            // Skip if user is not currently enrolled in course.
+            if(!is_enrolled($this->get_course_context(), $submission->authorid))  {
+                continue;
+            }
 
             // If allocations are in use, then we don't supply files that are not allocated.
             $submission = submission::find($submission);
+            if ($convert == 1) {
+                $files = $fs->get_area_files($context->id, 'mod_coursework', 'convertedpdf',
+                                            $submission->id, "id", false);
+            } else {
+                $files = $fs->get_area_files($context->id, 'mod_coursework', 'submission',
+                                            $submission->id, "id", false);
+            }
 
-            $files = $fs->get_area_files($context->id, 'mod_coursework', 'submission',
-                                         $submission->id, "id", false);
+            if (!$files) {
+                continue;
+            }
+
             foreach ($files as $f) {
 
                 $filename = basename($f->get_filename());
@@ -979,6 +993,15 @@ class coursework extends table_base {
                     } else if (!$this->is_configured_to_have_group_submissions()) {
                         $foldername = $submissionuser->firstname . ' ' . $submissionuser->lastname . '_';
                     }
+                }
+
+                if ($convert == 1 && !$DB->record_exists('files', [
+                    'component' => 'mod_coursework',
+                    'filearea' => 'submission',
+                    'itemid' => $submission->id,
+                    'id' => $f->get_referencefileid()]
+                )) {
+                    continue;
                 }
 
                 $foldername .= $this->get_username_hash($submission->get_allocatable()->id());
@@ -2838,6 +2861,11 @@ class coursework extends table_base {
      */
     public function remove_submissions_by_user($userid) {
         global $DB;
+        $submissionids = $DB->get_records('coursework_submissions', ['courseworkid' => $this->id, 'authorid' => $userid,
+        'allocatabletype' => 'user'], '', 'id');
+        list($sql, $params) = $DB->get_in_or_equal(array_keys($submissionids));
+        $DB->delete_records_select('coursework_submissions_conversion', "submissionid $sql", $params);
+
         $DB->delete_records('coursework_submissions', ['courseworkid' => $this->id, 'authorid' => $userid, 'allocatabletype' => 'user']);
     }
     /**
@@ -2847,6 +2875,10 @@ class coursework extends table_base {
      */
     public function remove_submissions_by_coursework() {
         global $DB;
+        $submissionids = $DB->get_records('coursework_submissions', ['courseworkid' => $this->id], '', 'id');
+        list($sql, $params) = $DB->get_in_or_equal(array_keys($submissionids));
+        $DB->delete_records_select('coursework_submissions_conversion', "submissionid $sql", $params);
+
         $DB->delete_records('coursework_submissions', ['courseworkid' => $this->id, 'allocatabletype' => 'user']);
     }
     /**

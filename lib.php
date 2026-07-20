@@ -80,6 +80,10 @@ function mod_coursework_pluginfile($course, $cm, $context, $filearea, $args, $fo
 
     require_login($course, false, $cm);
 
+    if ($filearea !== 'convertedpdf' && $filearea !== 'submission' && $filearea !== 'feedback') {
+        return false;
+    }
+
     if (!$coursework = $DB->get_record('coursework', ['id' => $cm->instance])) {
         return false;
     }
@@ -112,34 +116,56 @@ function mod_coursework_pluginfile($course, $cm, $context, $filearea, $args, $fo
         send_stored_file($file, 0, 0, true); // Download MUST be forced - security!
         return true;
 
-    } else {
-        if ($filearea === 'feedback') {
-            $feedbackid = (int)array_shift($args);
+    }
 
-            /**
-             * @var feedback $feedback
-             */
-            $feedback = feedback::find($feedbackid);
-            if (!$feedback) {
-                return false;
-            }
+    if ($filearea === 'feedback') {
+        $feedbackid = (int)array_shift($args);
 
-            if (!$ability->can('show', $feedback)) {
-                throw new access_denied(coursework::find($coursework));
-            }
-
-            $relativepath = implode('/', $args);
-            $fullpath = "/{$context->id}/mod_coursework/feedback/".
-                "{$feedback->id}/{$relativepath}";
-
-            $fs = get_file_storage();
-            $file = $fs->get_file_by_hash(sha1($fullpath));
-            if (!$file || $file->is_directory()) {
-                return false;
-            }
-            send_stored_file($file, 0, 0, true);
-            return true;
+        /**
+         * @var feedback $feedback
+         */
+        $feedback = feedback::find($feedbackid);
+        if (!$feedback) {
+            return false;
         }
+
+        if (!$ability->can('show', $feedback)) {
+            throw new access_denied(coursework::find($coursework));
+        }
+
+        $relativepath = implode('/', $args);
+        $fullpath = "/{$context->id}/mod_coursework/feedback/".
+            "{$feedback->id}/{$relativepath}";
+
+        $fs = get_file_storage();
+        $file = $fs->get_file_by_hash(sha1($fullpath));
+        if (!$file || $file->is_directory()) {
+            return false;
+        }
+        send_stored_file($file, 0, 0, true);
+        return true;
+    }
+
+    if ($filearea === 'convertedpdf') {
+        $itemid   = (int) array_shift($args);
+        $filename = array_shift($args);
+
+        $fs   = get_file_storage();
+        $file = $fs->get_file(
+            $context->id,
+            'mod_coursework',
+            $filearea,
+            $itemid,
+            '/',
+            $filename,
+        );
+
+        if (!$file) {
+            return false;
+        }
+
+        send_stored_file($file, 0, 0, true);
+        return true;
     }
 
     return false;

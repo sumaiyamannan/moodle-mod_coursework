@@ -303,6 +303,8 @@ class provider implements
                     $coursework->remove_plagiarisms_by_submission($submission->id);
                     // remove corresponding file of this submission
                     $coursework->remove_corresponding_file($context->id, $submission->id, 'submission');
+                    // remove converted file of this submission
+                    $coursework->remove_corresponding_file($context->id, $submission->id, 'convertedpdf');
                     // Retrieve all feedbacks for this current submission
                     $feedbacks = $coursework->retrieve_feedbacks_by_submission($submission->id);
                     foreach ($feedbacks as $feedback) {

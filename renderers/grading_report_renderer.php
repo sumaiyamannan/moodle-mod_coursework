@@ -84,6 +84,7 @@ class mod_coursework_grading_report_renderer extends plugin_renderer_base {
     private function generate_lang_element() {
         $langmessages = [
             'download_submitted_files' => get_string('download_submitted_files', 'mod_coursework'),
+            'download_converted_files' => get_string('download_converted_files', 'mod_coursework'),
             'exportfinalgrades' => get_string('exportfinalgrades', 'mod_coursework'),
             'exportgradingsheets' => get_string('exportgradingsheets', 'mod_coursework'),
             'loadingpagination' => get_string('loadingpagination', 'mod_coursework'),

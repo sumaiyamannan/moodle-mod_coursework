@@ -2538,6 +2538,30 @@ function xmldb_coursework_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2024100700, 'coursework');
     }
 
+    if ($oldversion < 2026070801) {
+
+        // Define field id to be added to coursework_submissions_conversion.
+        $table = new xmldb_table('coursework_submissions_conversion');
+        // Adding fields to table coursework_submissions_conversion.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('submissionid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('fileid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('status', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, null, null, '0');
+
+        // Adding keys to table coursework_submissions_conversion.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+
+        // Conditionally launch create table for coursework_submissions_conversion.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Coursework savepoint reached.
+        upgrade_mod_savepoint(true, 2026070801, 'coursework');
+    }
+
+
     // Always needs to return true.
     return true;
 }

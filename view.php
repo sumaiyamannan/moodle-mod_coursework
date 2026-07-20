@@ -59,6 +59,7 @@ if (!$courseworkid) {
 }
 $publish = optional_param('publishbutton', 0, PARAM_ALPHA);
 $download = optional_param('download', false, PARAM_BOOL);
+$downloadconverted = optional_param('downloadconverted', false, PARAM_BOOL);
 $resubmit = optional_param('resubmit', 0, PARAM_TEXT); // Are we resubmitting a turnitin thing?
 $resubmitted = optional_param('resubmitted', 0, PARAM_INT); // Is this a post-resubmit redirect?
 $submissionid = optional_param('submissionid', 0, PARAM_INT); // Which thing to resubmit.
@@ -296,6 +297,9 @@ require_login($course, true, $coursemodule);
 // Name of new zip file.
 $filename = str_replace(' ', '_', clean_filename($COURSE->shortname . '-' . $coursework->name . '.zip'));
 if ($download && $zipfile = $coursework->pack_files()) {
+    send_temp_file($zipfile, $filename); // Send file and delete after sending.
+}
+if ($downloadconverted && $zipfile = $coursework->pack_files(1)) {
     send_temp_file($zipfile, $filename); // Send file and delete after sending.
 }
 

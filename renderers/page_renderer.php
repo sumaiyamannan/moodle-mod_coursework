@@ -644,6 +644,8 @@ class mod_coursework_page_renderer extends plugin_renderer_base {
 
             $url = $pageurl.'&download=1';
             $links[$url] = get_string('download_submitted_files', 'coursework');
+            $url = $pageurl.'&downloadconverted=1';
+            $links[$url] = get_string('download_converted_files', 'coursework');
         }
         // export final grades button
         if (has_capability('mod/coursework:viewallgradesatalltimes',

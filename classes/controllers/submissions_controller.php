@@ -146,6 +146,9 @@ class submissions_controller extends controller_base {
         $filesid = file_get_submitted_draft_itemid('submission_manager');
         $submission->save_files($filesid);
 
+        $convert = new \mod_coursework\convert($this->coursework, $submission->id);
+        $convert->queue($submission->get_author_id());
+
         $context = \context_module::instance($this->coursemodule->id);
         // Trigger assessable_submitted event to show files are complete.
         $params = [
@@ -269,6 +272,9 @@ class submissions_controller extends controller_base {
 
         $filesid = file_get_submitted_draft_itemid('submission_manager');
         $submission->save_files($filesid);
+
+        $convert = new \mod_coursework\convert($this->coursework, $submission->id);
+        $convert->queue($submission->get_author_id());
 
         $context = \context_module::instance($this->coursemodule->id);
         // Trigger assessable_submitted event to show files are complete.
