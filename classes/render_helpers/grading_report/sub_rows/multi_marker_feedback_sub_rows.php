@@ -364,7 +364,7 @@ class multi_marker_feedback_sub_rows implements sub_rows_interface {
         } else {
 
             $newfeedback = $this->build_new_feedback($feedbackrow, $submission);
-            if ($ability->can('new', $newfeedback) && !$this->alreadyshownanewbutton) {
+            if ($ability->can('new', $newfeedback)) {
                 $html .= $this->new_feedaback_link($feedbackrow);
             }
         }

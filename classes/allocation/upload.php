@@ -110,7 +110,11 @@ class upload {
 
                     if ($allocatabletype == 'user') {
                         // get user id
-                        $suballocatable = $DB->get_record('user', [$assessoridentifier => $value]);
+                        // Modified by Yixuan
+                        $sql = "SELECT * FROM {user} WHERE LOWER($assessoridentifier) = LOWER(:value)";
+                        $params = ['value' => $value];
+                        $suballocatable = $DB->get_record_sql($sql, $params);
+                        //$suballocatable = $DB->get_record('user', [$assessoridentifier => $value]);
                         $allocatable = ($suballocatable) ? \mod_coursework\models\user::find($suballocatable->id) : '';
                     } else {
                         // get group id
@@ -138,7 +142,11 @@ class upload {
                         continue;
                     }
 
-                    $assessor = $DB->get_record('user', [$assessoridentifier => $value]);
+                    // Modified by Yixuan
+                    $sql = "SELECT * FROM {user} WHERE LOWER($assessoridentifier) = LOWER(:value)";
+                    $params = ['value' => $value];
+                    $assessor = $DB->get_record_sql($sql, $params);
+                    //$assessor = $DB->get_record('user', [$assessoridentifier => $value]);
 
                     if (!$assessor ||!in_array($assessor->id, $assessors)) {
                         $errors[$s] = get_string('assessornotincoursework', 'coursework', $keynum ); continue;
@@ -235,7 +243,12 @@ class upload {
                 if ($cells[$keynum] == 'allocatable') {
                     if ($allocatabletype == 'user') {
                         // get user id
-                        $suballocatable = $DB->get_record('user', [$assessoridentifier => $value]);
+
+                        // Modified by Yixuan
+                        $sql = "SELECT * FROM {user} WHERE LOWER($assessoridentifier) = LOWER(:value)";
+                        $params = ['value' => $value];
+                        $suballocatable = $DB->get_record_sql($sql, $params);
+                        //$suballocatable = $DB->get_record('user', [$assessoridentifier => $value]);
                         $allocatable = ($suballocatable) ? \mod_coursework\models\user::find($suballocatable->id) : '';
                     } else {
                         // get group id
@@ -246,7 +259,11 @@ class upload {
                 }
                 if ($allocatable && substr($cells[$keynum], 0, 8) == 'assessor' && !empty($value)) {
 
-                    $assessor = $DB->get_record('user', [$assessoridentifier => $value]);
+                    // Modified by Yixuan
+                    $sql = "SELECT * FROM {user} WHERE LOWER($assessoridentifier) = LOWER(:value)";
+                    $params = ['value' => $value];
+                    $assessor = $DB->get_record_sql($sql, $params);
+                    //$assessor = $DB->get_record('user', [$assessoridentifier => $value]);
 
                     $params = ['courseworkid' => $this->coursework->id,
                                     'allocatableid' => $allocatable->id,
